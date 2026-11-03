@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SOG Interactive - Spriters Resource Downloader</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-tag">SOG Interactive</span> Spriters Resource Downloader <span id="version" class="muted"></span></div>
+  <div id="session-banner" class="banner hidden">
+    <span id="session-text"></span>
+    <button id="btn-show-browser" class="btn small">Show browser window</button>
+  </div>
+  <button id="btn-credits" class="btn small">Credits</button>
+</header>
+
+<!-- ============ CREDITS PANEL ============ -->
+<div id="credits" class="overlay hidden">
+  <div class="card credits-card">
+    <h1>Credits</h1>
+    <h2>Original project</h2>
+    <p>
+      <b>Spriters-Resource-Downloader</b> by <b>torresflo</b>. The command-line downloader that
+      this app is based on: its idea, its page-scraping approach and its GPL v3 licence all come from
+      that project.<br>
+      <button class="linklike open-url" data-url="https://github.com/torresflo/Spriters-Resource-Downloader">github.com/torresflo/Spriters-Resource-Downloader</button>
+    </p>
+    <h2>This app</h2>
+    <p>
+      <b>Spriters Resource Downloader</b> is a <b>SOG Interactive (Stroke of Genius Interactive)</b> tool: the point-and-click
+      interface, catalog with thumbnails and checkboxes, browser session and installer were added in 2026.
+      Released under the same GPL v3 licence.
+    </p>
+    <h2>Content</h2>
+    <p>
+      All sprites come from <b>The Spriters Resource</b> and belong to their respective owners and
+      submitters. Please respect the site and the people who rip and upload the sheets.<br>
+      <button class="linklike open-url" data-url="https://www.spriters-resource.com/">www.spriters-resource.com</button>
+    </p>
+    <h2>Built with</h2>
+    <p>
+      <button class="linklike open-url" data-url="https://pywebview.flowrl.com/">pywebview</button> (Edge WebView2 windows),
+      <button class="linklike open-url" data-url="https://www.crummy.com/software/BeautifulSoup/">Beautiful Soup</button> (HTML parsing),
+      <button class="linklike open-url" data-url="https://pyinstaller.org/">PyInstaller</button> (packaging), Python.
+    </p>
+    <div class="actions"><button id="btn-credits-close" class="btn primary">Close</button></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ START SCREEN ============ -->
+<section id="screen-start" class="screen">
+  <div class="card">
+    <div class="brand-line">A SOG Interactive (Stroke of Genius Interactive) tool</div>
+    <h1>Download sprites from The Spriters Resource</h1>
+    <div class="credit">
+      Based on <b>Spriters-Resource-Downloader</b> by <b>torresflo</b>, who wrote the original
+      command-line downloader this app grew from (GPL v3).
+      <button class="linklike open-url" data-url="https://github.com/torresflo/Spriters-Resource-Downloader">github.com/torresflo/Spriters-Resource-Downloader</button>
+    </div>
+    <p class="muted">
+      Paste the address of a <b>game page</b>, pick where the files should go, then either grab
+      everything or inventory the page first and tick exactly what you want.
+    </p>
+
+    <label class="field">
+      <span>Game page address</span>
+      <input id="url" type="text" spellcheck="false"
+             placeholder="https://www.spriters-resource.com/game_boy_gbc/pokemongoldsilver/">
+      <small id="url-status" class="muted"></small>
+    </label>
+
+    <label class="field">
+      <span>Download to</span>
+      <div class="row">
+        <input id="dest" type="text" spellcheck="false" placeholder="C:\Users\you\Downloads\Spriters Resource">
+        <button id="btn-browse" class="btn">Browse...</button>
+      </div>
+      <small class="muted">Files are organised as <code>Console \ Game \ Section \ Sheet name.png</code>.</small>
+    </label>
+
+    <div class="options">
+      <label><input type="checkbox" id="opt-thumbs" checked> Load thumbnails when inventorying</label>
+      <label><input type="checkbox" id="opt-extract" checked> Extract .zip sheets into folders</label>
+      <label><input type="checkbox" id="opt-skip" checked> Skip files that already exist</label>
+      <label><input type="checkbox" id="opt-nsfw"> Include NSFW sheets (uses the site's own toggle)</label>
+    </div>
+
+    <div class="actions">
+      <button id="btn-all" class="btn primary big">Download everything</button>
+      <button id="btn-inventory" class="btn big">Inventory first (choose what to download)</button>
+    </div>
+
+    <div id="start-status" class="status muted"></div>
+    <div id="start-error" class="error hidden"></div>
+
+    <details class="help">
+      <summary>How the browser window works</summary>
+      <p>
+        The site protects itself with a "Verify you are human" check that only a real browser can pass.
+        This app opens a real browser window next to it. If that window shows the check, click it
+        yourself once; the app then reads pages and files through that same window. Your clearance is
+        remembered between runs, so you will rarely see it again.
+      </p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ CATALOG SCREEN ============ -->
+<section id="screen-catalog" class="screen hidden">
+  <div class="catalog-head">
+    <div>
+      <h1 id="cat-title"></h1>
+      <div id="cat-sub" class="muted"></div>
+      <div id="cat-warnings" class="warn hidden"></div>
+    </div>
+    <div class="catalog-head-right">
+      <div id="cat-selected" class="selected-count"></div>
+      <button id="btn-back" class="btn">Back</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="group">
+      <button id="btn-select-all" class="btn">Select all</button>
+      <button id="btn-deselect-all" class="btn">Deselect all</button>
+      <button id="btn-invert" class="btn">Invert</button>
+    </div>
+    <div class="group">
+      <input id="filter" type="search" placeholder="Filter by name or section...">
+      <button id="btn-select-shown" class="btn small" title="Select every item currently shown by the filter">Select shown</button>
+      <button id="btn-deselect-shown" class="btn small" title="Deselect every item currently shown by the filter">Deselect shown</button>
+    </div>
+    <div class="group">
+      <label>Sort
+        <select id="sort">
+          <option value="page">Page order</option>
+          <option value="name">Name A-Z</option>
+          <option value="name-desc">Name Z-A</option>
+        </select>
+      </label>
+      <label>Size
+        <select id="thumb-size">
+          <option value="72">Small</option>
+          <option value="110" selected>Medium</option>
+          <option value="170">Large</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="only-selected"> Only selected</label>
+    </div>
+    <div class="group">
+      <button id="btn-expand" class="btn small">Expand all</button>
+      <button id="btn-collapse" class="btn small">Collapse all</button>
+    </div>
+  </div>
+
+  <div id="thumb-progress" class="muted small-text hidden"></div>
+  <div id="sections"></div>
+
+  <footer class="catalog-foot">
+    <div class="muted">Saving to <code id="foot-dest"></code> <button id="btn-foot-browse" class="btn small">Change</button></div>
+    <button id="btn-download-selected" class="btn primary big">Download selected</button>
+  </footer>
+</section>
+
+<!-- ============ PROGRESS SCREEN ============ -->
+<section id="screen-progress" class="screen hidden">
+  <div class="card wide">
+    <h1 id="prog-title">Downloading...</h1>
+    <div class="progress"><div id="prog-bar" class="bar"></div></div>
+    <div id="prog-text" class="muted"></div>
+    <div class="current">
+      <img id="prog-thumb" class="thumb" alt="">
+      <div id="prog-item" class="current-title"></div>
+    </div>
+    <div class="counters">
+      <span class="ok">Done: <b id="cnt-ok">0</b></span>
+      <span class="skip">Skipped: <b id="cnt-skip">0</b></span>
+      <span class="fail">Failed: <b id="cnt-fail">0</b></span>
+    </div>
+    <div id="log" class="log"></div>
+    <div id="prog-error" class="error hidden"></div>
+    <div class="actions">
+      <button id="btn-cancel" class="btn danger">Cancel</button>
+      <button id="btn-open-folder" class="btn hidden">Open folder</button>
+      <button id="btn-to-catalog" class="btn hidden">Back to list</button>
+      <button id="btn-start-over" class="btn hidden">Start over</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<template id="tpl-section">
+  <div class="section">
+    <div class="section-head">
+      <button class="caret" title="Collapse / expand">&#9662;</button>
+      <input type="checkbox" class="sec-check" title="Select / deselect this section">
+      <span class="sec-name"></span>
+      <span class="sec-count muted"></span>
+      <button class="btn tiny sec-only" title="Select only this section">Only this</button>
+    </div>
+    <div class="grid"></div>
+  </div>
+</template>
+
+<template id="tpl-item">
+  <div class="item" tabindex="0">
+    <input type="checkbox" class="item-check">
+    <div class="thumb-wrap"><img class="thumb" alt="" loading="lazy"></div>
+    <div class="item-title"></div>
+  </div>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Dependencies of the original command-line script (spriters-resource-downloader.py).
+# That script predates the site's bot check and no longer works unattended; it is kept for reference only.
+beautifulsoup4>=4.11
+Pillow>=9.4
+progress>=1.6
+requests>=2.28
