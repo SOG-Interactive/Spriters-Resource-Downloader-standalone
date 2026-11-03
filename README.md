@@ -18,8 +18,9 @@ every sheet so you can choose exactly what to download.
 
 **Option A - installer (no Python needed)**
 
-1. Double-click **`Spriters Resource Downloader Setup.exe`** (in `dist\` after a build,
-   or from a release).
+1. Download **`Spriters.Resource.Downloader.Setup.exe`** from the
+   [latest release](https://github.com/SOG-Interactive/Spriters-Resource-Downloader/releases/latest)
+   and double-click it. (Windows SmartScreen may warn once; the file is not code-signed.)
 2. Click **Install**. It installs to `%LOCALAPPDATA%\Programs\Spriters Resource Downloader`
    and puts a **Spriters Resource Downloader** shortcut on your Desktop and in the Start Menu.
 3. Double-click the shortcut to launch. To remove it later, use Settings > Apps or run
